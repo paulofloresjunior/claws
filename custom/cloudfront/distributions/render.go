@@ -2,6 +2,7 @@ package distributions
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/clawscli/claws/internal/dao"
@@ -189,7 +190,17 @@ func (r *DistributionRenderer) RenderDetail(resource dao.Resource) string {
 	}
 
 	// Tags (only available after d:describe / Enter)
-	d.Tags(dist.GetTags())
+	if tags := dist.GetTags(); len(tags) > 0 {
+		d.Section("Tags")
+		keys := make([]string, 0, len(tags))
+		for k := range tags {
+			keys = append(keys, k)
+		}
+		slices.Sort(keys)
+		for _, key := range keys {
+			d.Field(key, tags[key])
+		}
+	}
 
 	// In-progress invalidations
 	if batches := dist.InProgressInvalidationBatches(); batches > 0 {
